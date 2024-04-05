@@ -7,8 +7,8 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 YELLOW = (255, 255, 0)
-TRANSYELLOW = (255, 255, 0, 100)
 GRAY = (128, 128, 128)
+LIGHTGRAY = (180, 180, 180)
 
 # Preparation of pygame related things
 pygame.init()
@@ -67,15 +67,38 @@ class Player(Entity):
 
 # The enemy class
 class Ghost(Entity):
-    def __init__(self, speed):
+    def __init__(self, speed: int):
         super().__init__()
         self.speed = speed
 
 # The resource meant to be collected's class
 class Sheep(Entity):
+    # Initiates the object by inheriting from the entity superclass, and setting a variable for whether it's being carried or not.
     def __init__(self):
         super().__init__()
         self.carried = False
+    # Function for movement check and execution
+    def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int, points: int) -> list:
+        if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces:
+            print("test")
+            spaces.append(self.coordinates)
+            occupiedSpaces.remove(self.coordinates)
+            self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
+            occupiedSpaces.append(self.coordinates)
+        elif [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in safetySpaces:
+            occupiedSpaces.remove(self.coordinates)
+            points += 1
+            self.carried = False
+            self.__init__()
+        self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
+    # A function that checks things like whether it's within a square of the player.
+    def update(self, playerobject: object, spaces: list, occupiedSpaces: list, safetySpaces: list, points: int):
+        if playerobject.x > self.x-50 and playerobject.x < self.x+50 and playerobject.y > self.y-50 and playerobject.y < self.y+50:
+            self.carried = True
+            # Add something for remembering the direction the player was in
+        elif self.carried:
+            self.movement(spaces, occupiedSpaces, safetySpaces, points)
+            
 
 # The obstacle class
 class Wall(Entity):
@@ -85,11 +108,15 @@ class Wall(Entity):
 # Creates class objects
 player = Player()
 walls = [Wall() for i in range(10)]
+sheep = [Sheep() for i in range(3)]
+ghosts = []
 
 
 # Game loop
 run = True
 counter = 0
+counter2 = 0
+points = 0
 while run:
     # Loop for checking if you're exiting the game
     for event in pygame.event.get():
@@ -121,7 +148,10 @@ while run:
         counter += 1
 
     # Update
-    
+    if counter2 < 12:
+        counter2 += 1
+    else:
+        counter2 = 0
 
     # Draws the screen and its game objects
     screen.fill(BLACK)
@@ -129,7 +159,13 @@ while run:
         pygame.draw.rect(screen, GREEN, pygame.Rect(tileCoordinate[0], tileCoordinate[1], 50, 50))
     for wall in walls:
         pygame.draw.rect(screen, GRAY, wall.rect)
-    pygame.draw.rect(screen, TRANSYELLOW, player.rect)
+    if counter2 < 7:
+        for sheepbit in sheep:
+            pygame.draw.rect(screen, WHITE, sheepbit.rect)
+    else:
+        for sheepbit in sheep:
+            pygame.draw.rect(screen, LIGHTGRAY, sheepbit.rect)
+    pygame.draw.rect(screen, YELLOW, player.rect)
 
     # Updates the display
     pygame.display.flip()
