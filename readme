@@ -1,0 +1,6 @@
+You have to use pip to install pygame and random:
+
+    python3 -m pip install -U pygame --user
+
+
+    pip install random2
