@@ -69,6 +69,10 @@ class Ghost(Entity):
     def movement(self, spaces: list, occupiedSpaces: list):
         if [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in spaces or [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in occupiedSpaces:
             self.coordinates = [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50]
+        elif [self.coordinates[0]-self.xDirection*50, self.coordinates[1]+self.yDirection*50] in spaces or [self.coordinates[0]-self.xDirection*50, self.coordinates[1]+self.yDirection*50] in occupiedSpaces:
+            self.xDirection *= -1
+        elif [self.coordinates[0]+self.xDirection*50, self.coordinates[1]-self.yDirection*50] in spaces or [self.coordinates[0]+self.xDirection*50, self.coordinates[1]-self.yDirection*50] in occupiedSpaces:
+            self.yDirection *= -1
         else:
             self.xDirection *= -1
             self. yDirection *= -1
