@@ -52,7 +52,6 @@ class Player(Entity):
     # Function for movement check and execution
     def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int) -> list:
         if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces:
-            print("test")
             spaces.append(self.coordinates)
             occupiedSpaces.remove(self.coordinates)
             self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
@@ -77,22 +76,24 @@ class Sheep(Entity):
         self.carried = False
     # Function for movement check and execution
     def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int, points: int) -> list:
-        if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces:
-            print("test")
-            spaces.append(self.coordinates)
-            occupiedSpaces.remove(self.coordinates)
-            self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
-            occupiedSpaces.append(self.coordinates)
-        elif [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in safetySpaces:
+        if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in safetySpaces:
             occupiedSpaces.remove(self.coordinates)
             points += 1
             self.carried = False
             self.__init__()
+        elif [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces:
+            print(f"coordinates: {self.coordinates[0]+xDirection*50},{self.coordinates[1]+yDirection*50}")
+            for item in spaces:
+                if item == [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]:
+                    print(item)
+            spaces.append(self.coordinates)
+            occupiedSpaces.remove(self.coordinates)
+            self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
+            occupiedSpaces.append(self.coordinates)
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
     # A function that checks things like whether it's within a square of the player.
     def update(self, playerobject: object, spaces: list, occupiedSpaces: list, safetySpaces: list, points: int):
         if playerobject.coordinates[0] >= self.coordinates[0]-50 and playerobject.coordinates[0] <= self.coordinates[0]+50 and playerobject.coordinates[1] >= self.coordinates[1]-50 and playerobject.coordinates[1] <= self.coordinates[1]+50:
-            print("hello world")
             self.carried = True
             if playerobject.coordinates[0] > self.coordinates[0]:
                 self.xDirection = 1
