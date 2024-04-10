@@ -140,6 +140,7 @@ ghosts = []
 run = True
 counter = 0
 counter2 = 0
+counter3 = 0
 points = 0
 while run:
     # Loop for checking if you're exiting the game
@@ -170,8 +171,12 @@ while run:
     else:
         counter += 1
     for ghost in ghosts:
-        if counter == 10//ghost.speed:
+        if counter3 == 10//ghost.speed:
             ghost.movement(spaces, occupiedSpaces)
+            counter3 = 0
+        else:
+            counter3 += 1
+
     # Update
     player.update(sheep)
     for ghost in ghosts:
