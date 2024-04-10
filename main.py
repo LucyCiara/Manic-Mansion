@@ -37,8 +37,7 @@ for space in safetySpaces:
 class Entity:
     # Initiation where the coordinate variables are set
     def __init__(self):
-        self.coordinates = spaces.pop(random.randint(0, len(spaces)-1))
-        occupiedSpaces.append(self.coordinates)
+        self.coordinates = spaces[random.randint(0, len(spaces)-1)]
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)   
 
 # The player class
@@ -48,6 +47,8 @@ class Player(Entity):
         super().__init__()
         self.speed = 1
         self.points = 0
+        spaces.remove(self.coordinates)
+        occupiedSpaces.append(self.coordinates)
 
     # Function for movement check and execution
     def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int) -> list:
@@ -83,19 +84,11 @@ class Sheep(Entity):
     # Function for movement check and execution
     def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int, points: int) -> list:
         if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in safetySpaces:
-            occupiedSpaces.remove(self.coordinates)
             points += 1
             self.carried = False
             self.__init__()
         elif [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces:
-            print(f"coordinates: {self.coordinates[0]+xDirection*50},{self.coordinates[1]+yDirection*50}")
-            for item in spaces:
-                if item == [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]:
-                    print(item)
-            spaces.append(self.coordinates)
-            occupiedSpaces.remove(self.coordinates)
             self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
-            occupiedSpaces.append(self.coordinates)
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
     # A function that checks things like whether it's within a square of the player.
     def update(self, playerobject: object, spaces: list, occupiedSpaces: list, safetySpaces: list, points: int):
@@ -116,11 +109,12 @@ class Sheep(Entity):
         elif self.carried:
             self.movement(spaces, occupiedSpaces, safetySpaces, self.xDirection, self.yDirection, points)
             
-
 # The obstacle class
 class Wall(Entity):
     def __init__(self):
         super().__init__()
+        spaces.remove(self.coordinates)
+        occupiedSpaces.append(self.coordinates)
 
 # Creates class objects
 player = Player()
