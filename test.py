@@ -1,7 +1,7 @@
-thingies = [0, 1, 2]
+class sheep:
+    def __init__(self):
+        self.carried = True
 
-def thingthang(x: list):
-    x.append(3)
+sheep = [sheep() for i in range(3)]
 
-thingthang(thingies)
-print(thingies)
+print([sheepbit.carried for sheepbit in sheep])
