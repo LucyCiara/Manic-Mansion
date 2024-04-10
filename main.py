@@ -81,9 +81,11 @@ class Sheep(Entity):
         super().__init__()
         self.carried = False
     # Function for movement check and execution
-    def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int, points: int) -> list:
+    def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int) -> list:
+        global points
         if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in safetySpaces:
             points += 1
+            print(points)
             self.carried = False
             self.__init__()
         elif [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces:
@@ -112,7 +114,7 @@ class Sheep(Entity):
                 self.yDirection = 0
         # If the if statement returns False, it checks whether it's being carried or not, and moves towards the player if it is.
         elif self.carried:
-            self.movement(spaces, occupiedSpaces, safetySpaces, self.xDirection, self.yDirection, points)
+            self.movement(spaces, occupiedSpaces, safetySpaces, self.xDirection, self.yDirection)
             
 # The obstacle class
 class Wall(Entity):
