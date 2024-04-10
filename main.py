@@ -27,10 +27,15 @@ for y in range(0, HEIGHT, 50):
 # Definition of safety space (the spaces where the safety zone is going to be) and then deletion of those spaces from the list of all possivle spaces
 row1Y = 250
 row2Y = row1Y+50
-safetySpaces = [
-    [0, row1Y], [50, row1Y], [700, row1Y], [750, row1Y],
-    [0, row2Y], [50, row2Y], [700, row2Y], [750, row2Y]
+safetySpacesLeft = [
+    [0, row1Y], [50, row1Y],
+    [0, row2Y], [50, row2Y]
     ]
+safetySpacesRight = [
+    [700, row1Y], [750, row1Y],
+    [700, row2Y], [750, row2Y]
+    ]
+safetySpaces = safetySpacesLeft+safetySpacesRight
 for space in safetySpaces:
     spaces.remove(space)
 
@@ -47,6 +52,8 @@ class Player(Entity):
     def __init__(self):
         super().__init__()
         self.speed = 1
+        self.coordinates = safetySpaces[0]
+        self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50) 
     # Function for movement check and execution
     def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int) -> list:
         if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces or [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in safetySpaces:
@@ -89,20 +96,25 @@ class Sheep(Entity):
     def __init__(self):
         super().__init__()
         self.carried = False
+        self.coordinates = safetySpacesRight.pop(random.randint(0, len(safetySpacesRight)-1))
+        self.originalSpace = self.coordinates
+        self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
     # Function for movement check and execution
-    def movement(self, spaces: list, ghosts: list, safetySpaces: list, xDirection: int, yDirection: int) -> list:
+    def movement(self, spaces: list, ghosts: list, walls: list, safetySpacesLeft: list, safetySpacesRight: list, safetySpaces: list) -> list:
         global points
-        if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in safetySpaces:
+        if [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in safetySpacesLeft:
             points += 1
             ghosts.append(Ghost(1))
+            walls.append(Wall())
             print(points)
             self.carried = False
+            safetySpacesRight.append(self.originalSpace)
             self.__init__()
-        elif [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces:
-            self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
+        elif [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in spaces or [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in safetySpaces:
+            self.coordinates = [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50]
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
     # A function that checks things like whether it's within a square of the player.
-    def update(self, playerobject: object, spaces: list, ghosts: list, safetySpaces: list):
+    def update(self, playerobject: object, spaces: list, ghosts: list, walls: list, safetySpacesLeft: list, safetySpacesRight: list, safetySpaces: list):
         global run
         # If the player collides with a sheep that's not being carried while carrying a sheep, the game will stop.
         if playerobject.coordinates == self.coordinates and not self.carried:
@@ -124,7 +136,7 @@ class Sheep(Entity):
                 self.yDirection = 0
         # If the if statement returns False, it checks whether it's being carried or not, and moves towards the player if it is.
         elif self.carried:
-            self.movement(spaces, ghosts, safetySpaces, self.xDirection, self.yDirection)
+            self.movement(spaces, ghosts, walls, safetySpacesLeft, safetySpacesRight, safetySpaces)
             
 # The obstacle class
 class Wall(Entity):
@@ -137,7 +149,7 @@ class Wall(Entity):
 player = Player()
 walls = [Wall() for i in range(3)]
 sheep = [Sheep() for i in range(3)]
-ghosts = []
+ghosts = [Ghost(1)]
 
 
 # Game loop
@@ -180,13 +192,12 @@ while run:
             counter3 = 0
         else:
             counter3 += 1
-
     # Update
     player.update(sheep)
     for ghost in ghosts:
         ghost.update(player)
     for sheepbit in sheep:
-        sheepbit.update(player, spaces, ghosts, safetySpaces)
+        sheepbit.update(player, spaces, ghosts, walls, safetySpacesLeft, safetySpacesRight, safetySpaces)
     if counter2 < 12:
         counter2 += 1
     else:
