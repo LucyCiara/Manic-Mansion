@@ -39,8 +39,6 @@ class Entity:
     def __init__(self):
         self.coordinates = spaces.pop(random.randint(0, len(spaces)-1))
         occupiedSpaces.append(self.coordinates)
-        self.x = self.coordinates[0]
-        self.y = self.coordinates[1]
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)   
 
 # The player class
@@ -93,11 +91,23 @@ class Sheep(Entity):
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
     # A function that checks things like whether it's within a square of the player.
     def update(self, playerobject: object, spaces: list, occupiedSpaces: list, safetySpaces: list, points: int):
-        if playerobject.x > self.x-50 and playerobject.x < self.x+50 and playerobject.y > self.y-50 and playerobject.y < self.y+50:
+        if playerobject.coordinates[0] >= self.coordinates[0]-50 and playerobject.coordinates[0] <= self.coordinates[0]+50 and playerobject.coordinates[1] >= self.coordinates[1]-50 and playerobject.coordinates[1] <= self.coordinates[1]+50:
+            print("hello world")
             self.carried = True
-            # Add something for remembering the direction the player was in
+            if playerobject.coordinates[0] > self.coordinates[0]:
+                self.xDirection = 1
+            elif playerobject.coordinates[0] < self.coordinates[0]:
+                self.xDirection = -1
+            else:
+                self.xDirection = 0
+            if playerobject.coordinates[1] > self.coordinates[1]:
+                self.yDirection = 1
+            elif playerobject.coordinates[1] < self.coordinates[1]:
+                self.yDirection = -1
+            else:
+                self.yDirection = 0
         elif self.carried:
-            self.movement(spaces, occupiedSpaces, safetySpaces, points)
+            self.movement(spaces, occupiedSpaces, safetySpaces, self.xDirection, self.yDirection, points)
             
 
 # The obstacle class
@@ -148,6 +158,8 @@ while run:
         counter += 1
 
     # Update
+    for sheepbit in sheep:
+        sheepbit.update(player, spaces, occupiedSpaces, safetySpaces, points)
     if counter2 < 12:
         counter2 += 1
     else:
