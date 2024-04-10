@@ -49,7 +49,6 @@ class Player(Entity):
         self.points = 0
         spaces.remove(self.coordinates)
         occupiedSpaces.append(self.coordinates)
-
     # Function for movement check and execution
     def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int) -> list:
         if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces:
@@ -62,7 +61,7 @@ class Player(Entity):
             self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
             occupiedSpaces.append(self.coordinates)
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
-
+    # A function to be called each update
     def update(self, sheepobjects):
         self.speed = 1
         for sheep in sheepobjects:
@@ -92,6 +91,11 @@ class Sheep(Entity):
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
     # A function that checks things like whether it's within a square of the player.
     def update(self, playerobject: object, spaces: list, occupiedSpaces: list, safetySpaces: list, points: int):
+        global run
+        # If the player collides with a sheep that's not being carried while carrying a sheep, the game will stop.
+        if playerobject.coordinates == self.coordinates and not self.carried:
+            run = False
+        # Checks if the player is within a square, and then sets its carried variable to True and remembers where the player is.
         if playerobject.coordinates[0] >= self.coordinates[0]-50 and playerobject.coordinates[0] <= self.coordinates[0]+50 and playerobject.coordinates[1] >= self.coordinates[1]-50 and playerobject.coordinates[1] <= self.coordinates[1]+50 and (True not in [sheepbit.carried for sheepbit in sheep] or self.carried):
             self.carried = True
             if playerobject.coordinates[0] > self.coordinates[0]:
@@ -106,6 +110,7 @@ class Sheep(Entity):
                 self.yDirection = -1
             else:
                 self.yDirection = 0
+        # If the if statement returns False, it checks whether it's being carried or not, and moves towards the player if it is.
         elif self.carried:
             self.movement(spaces, occupiedSpaces, safetySpaces, self.xDirection, self.yDirection, points)
             
@@ -118,7 +123,7 @@ class Wall(Entity):
 
 # Creates class objects
 player = Player()
-walls = [Wall() for i in range(10)]
+walls = [Wall() for i in range(3)]
 sheep = [Sheep() for i in range(3)]
 ghosts = []
 
@@ -133,7 +138,6 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    
     # Handles player input
     if counter == 10//player.speed:
         keys = pygame.key.get_pressed()
@@ -157,7 +161,6 @@ while run:
             counter = 0
     else:
         counter += 1
-
     # Update
     player.update(sheep)
     for sheepbit in sheep:
@@ -166,7 +169,6 @@ while run:
         counter2 += 1
     else:
         counter2 = 0
-
     # Draws the screen and its game objects
     screen.fill(BLACK)
     for tileCoordinate in safetySpaces:
@@ -180,7 +182,6 @@ while run:
         for sheepbit in sheep:
             pygame.draw.rect(screen, LIGHTGRAY, sheepbit.rect)
     pygame.draw.rect(screen, YELLOW, player.rect)
-
     # Updates the display
     pygame.display.flip()
     clock.tick(60)
