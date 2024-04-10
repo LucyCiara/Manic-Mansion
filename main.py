@@ -46,8 +46,8 @@ class Player(Entity):
     # Initiation where the player speed int, points int, and carries bool is set
     def __init__(self):
         super().__init__()
+        self.speed = 1
         self.points = 0
-        self.carries = False
 
     # Function for movement check and execution
     def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int) -> list:
@@ -61,6 +61,12 @@ class Player(Entity):
             self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
             occupiedSpaces.append(self.coordinates)
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
+
+    def update(self, sheepobjects):
+        self.speed = 1
+        for sheep in sheepobjects:
+            if sheep.carried:
+                self.speed = 0.5
 
 # The enemy class
 class Ghost(Entity):
@@ -135,7 +141,7 @@ while run:
             run = False
     
     # Handles player input
-    if counter == 12:
+    if counter == 10//player.speed:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] and keys[pygame.K_DOWN]:
             player.movement(spaces, occupiedSpaces, safetySpaces, 0, 0)
@@ -159,6 +165,7 @@ while run:
         counter += 1
 
     # Update
+    player.update(sheep)
     for sheepbit in sheep:
         sheepbit.update(player, spaces, occupiedSpaces, safetySpaces, points)
     if counter2 < 12:
