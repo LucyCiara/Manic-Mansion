@@ -56,8 +56,6 @@ while running:
         if troll.colliderect(food):
             if food not in obstacles and time.time() - blink_start_time > BLINK_TIME:
                 score += 1
-                blink_start_time = time.time()
-                
                 obstacles.append(food.copy())
                 foods.remove(food)
                 foods.append(pygame.Rect(
@@ -66,7 +64,7 @@ while running:
                     50, 50
                 ))
                 speed += 1
-                
+                blink_start_time = time.time()
             else:
                 troll.x -= troll.x % speed  # Tilbakestill posisjon for å unngå overlapping
         
@@ -91,8 +89,6 @@ while running:
     pygame.draw.rect(screen, GREEN, troll)
     for obstacle in obstacles:
         pygame.draw.rect(screen, GRAY, obstacle)
-    for food in foods:
-        pygame.draw.rect(screen, YELLOW, food)
 
     # Tegn poengsum
     score_text = font.render("Poeng: " + str(score), True, GREEN)
@@ -103,6 +99,7 @@ while running:
 
 pygame.quit()
 
-# AUTHOR'S NOTES:
 
-# I denne versjonen av programmet har jeg endret slik at maten blir tegnet, og slik at blink time skjer før maten blir et hinder. det funker fortsatt ikke.
+# LEDERTEKST:
+
+# trollet dør fortsatt rett etter den berører maten. kan du få maten til å bytte mellom grå og gul farge i noen sekunder før den blir til et hinder?

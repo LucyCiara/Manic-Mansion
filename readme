@@ -4,3 +4,5 @@ You have to use pip to install pygame and random:
 
 
     pip install random2
+
+I copied some of the code from "game4.py" and deleted the non-essential stuff to make a template. Aside from a few things like the initiation part, everything was coded by me. "game4.py" is a previous project where I tried to get ChatGPT to make a game.  This was a modified iteration from a multiple file long series of attempts. Their prompts are written at the bottom of the code. The prompts are in Norwegian, and I've decided to not translate them, since that would be tampering with the prompt used.

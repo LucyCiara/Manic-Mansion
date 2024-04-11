@@ -1,3 +1,4 @@
+# Imports the required libraries
 import pygame
 import random
 
@@ -15,7 +16,6 @@ RED = (255, 0, 0)
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
-font = pygame.font.Font(None, 36)
 
 # Calculation of all possible spaces
 spaces = []
@@ -48,32 +48,37 @@ class Entity:
 
 # The player class
 class Player(Entity):
-    # Initiation where the player speed int, points int, and carries bool is set
+    # Initiation where the super class is inherited, the player speed int is set, and the coordinates are changed to the safety space to the left
     def __init__(self):
         super().__init__()
         self.speed = 1
         self.coordinates = safetySpaces[0]
-        self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50) 
+        self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
+
     # Function for movement check and execution
-    def movement(self, spaces: list, occupiedSpaces: list, safetySpaces: list, xDirection: int, yDirection: int) -> list:
+    def movement(self, xDirection: int, yDirection: int) -> list:
         if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces or [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in safetySpaces:
             self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
-    # A function to be called each update
-    def update(self, sheepobjects):
+    
+    # A function to be called each update that lowers the speed when carrying a sheep
+    def update(self):
         self.speed = 1
-        for sheep in sheepobjects:
-            if sheep.carried:
+        for sheepBit in sheep:
+            if sheepBit.carried:
                 self.speed = 0.5
 
 # The enemy class
 class Ghost(Entity):
-    def __init__(self, speed):
+    # Initiation where the speed is set and the movement direction is randomized to each possible diagonal movement and the super class is inherited
+    def __init__(self, speed: int):
         super().__init__()
         self.speed = speed
         self.xDirection = [-1, 1][random.randint(0, 1)]
         self.yDirection = [-1, 1][random.randint(0, 1)]
-    def movement(self, spaces: list, occupiedSpaces: list):
+    
+    # Handles movement and bouncing off of the map edges and safety spaces
+    def movement(self):
         if [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in spaces or [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in occupiedSpaces:
             self.coordinates = [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50]
         elif [self.coordinates[0]-self.xDirection*50, self.coordinates[1]+self.yDirection*50] in spaces or [self.coordinates[0]-self.xDirection*50, self.coordinates[1]+self.yDirection*50] in occupiedSpaces:
@@ -84,23 +89,25 @@ class Ghost(Entity):
             self.xDirection *= -1
             self. yDirection *= -1
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
+    
+    # Checks collision with player and stops the game loop if it happens
     def update(self, playerObject: object):
         global run
-        # Checks whether the player is colliding with the ghost, and stops the game if it is.
         if self.coordinates == playerObject.coordinates:
             run = False
 
-# The resource meant to be collected's class
+# The class of the resource meant to be collected
 class Sheep(Entity):
-    # Initiates the object by inheriting from the entity superclass, and setting a variable for whether it's being carried or not.
+    # Initiates the object by inheriting from the entity superclass, changing its position to a random position on the right safetyspaces, and setting a variable for whether it's being carried or not
     def __init__(self):
         super().__init__()
         self.carried = False
         self.coordinates = safetySpacesRight.pop(random.randint(0, len(safetySpacesRight)-1))
         self.originalSpace = self.coordinates
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
-    # Function for movement check and execution
-    def movement(self, spaces: list, ghosts: list, walls: list, safetySpacesLeft: list, safetySpacesRight: list, safetySpaces: list) -> list:
+    
+    # Function for movement check and execution, and gives a point before returning to the right safe space and creating a wall and a ghost when reaching the left safe space
+    def movement(self):
         global points
         if [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in safetySpacesLeft:
             points += 1
@@ -113,13 +120,14 @@ class Sheep(Entity):
         elif [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in spaces or [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50] in safetySpaces:
             self.coordinates = [self.coordinates[0]+self.xDirection*50, self.coordinates[1]+self.yDirection*50]
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
-    # A function that checks things like whether it's within a square of the player.
-    def update(self, playerobject: object, spaces: list, ghosts: list, walls: list, safetySpacesLeft: list, safetySpacesRight: list, safetySpaces: list):
+    
+    # A function that checks things like whether it's within a square of the player
+    def update(self, playerobject: object):
         global run
-        # If the player collides with a sheep that's not being carried while carrying a sheep, the game will stop.
+        # If the player collides with a sheep that's not being carried while carrying a sheep, the game will stop
         if playerobject.coordinates == self.coordinates and not self.carried:
             run = False
-        # Checks if the player is within a square, and then sets its carried variable to True and remembers where the player is.
+        # Checks if the player is within a square, and then sets its carried variable to True and remembers where the player is
         if playerobject.coordinates[0] >= self.coordinates[0]-50 and playerobject.coordinates[0] <= self.coordinates[0]+50 and playerobject.coordinates[1] >= self.coordinates[1]-50 and playerobject.coordinates[1] <= self.coordinates[1]+50 and (True not in [sheepbit.carried for sheepbit in sheep] or self.carried):
             self.carried = True
             if playerobject.coordinates[0] > self.coordinates[0]:
@@ -134,74 +142,84 @@ class Sheep(Entity):
                 self.yDirection = -1
             else:
                 self.yDirection = 0
-        # If the if statement returns False, it checks whether it's being carried or not, and moves towards the player if it is.
+        # If the if statement returns False, it checks whether it's being carried or not, and moves towards the player if it is
         elif self.carried:
-            self.movement(spaces, ghosts, walls, safetySpacesLeft, safetySpacesRight, safetySpaces)
+            self.movement()
             
 # The obstacle class
 class Wall(Entity):
+    # Initiates by inheriting the super class and removing its position from the available spaces for the player
     def __init__(self):
         super().__init__()
         spaces.remove(self.coordinates)
         occupiedSpaces.append(self.coordinates)
 
-# Creates class objects
+# Creates the class objects
 player = Player()
 walls = [Wall() for i in range(3)]
 sheep = [Sheep() for i in range(3)]
 ghosts = [Ghost(1)]
 
 
-# Game loop
+# Game loop variables get set
 run = True
 counter = 0
 counter2 = 0
 counter3 = 0
 points = 0
+
+# Game loop
 while run:
     # Loop for checking if you're exiting the game
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    # Handles player input
+    
+    # Handles player input and movement. The counter is there to get the player's movement to look clonky and retro
     if counter == 10//player.speed:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] and keys[pygame.K_DOWN]:
-            player.movement(spaces, occupiedSpaces, safetySpaces, 0, 0)
+            player.movement(0, 0)
             counter = 0
         elif keys[pygame.K_UP]:
-            player.movement(spaces, occupiedSpaces, safetySpaces, 0, -1)
+            player.movement(0, -1)
             counter = 0
         elif keys[pygame.K_DOWN]:
-            player.movement(spaces, occupiedSpaces, safetySpaces, 0, 1)
+            player.movement(0, 1)
             counter = 0
         if keys[pygame.K_LEFT] and keys[pygame.K_RIGHT]:
-            player.movement(spaces, occupiedSpaces, safetySpaces, 0, 0)
+            player.movement(0, 0)
             counter = 0
         elif keys[pygame.K_LEFT]:
-            player.movement(spaces, occupiedSpaces, safetySpaces, -1, 0)
+            player.movement(-1, 0)
             counter = 0
         elif keys[pygame.K_RIGHT]:
-            player.movement(spaces, occupiedSpaces, safetySpaces, 1, 0)
+            player.movement(1, 0)
             counter = 0
     else:
         counter += 1
+    
+    # A for loop to handle the movement of the ghosts. The counter is there to do the same thing as with the player
     for ghost in ghosts:
         if counter3 == 10//ghost.speed:
-            ghost.movement(spaces, occupiedSpaces)
+            ghost.movement()
             counter3 = 0
         else:
             counter3 += 1
-    # Update
-    player.update(sheep)
+    
+    # Executes the update functions of the various updates
+    player.update()
     for ghost in ghosts:
         ghost.update(player)
     for sheepbit in sheep:
-        sheepbit.update(player, spaces, ghosts, walls, safetySpacesLeft, safetySpacesRight, safetySpaces)
+        sheepbit.update(player)
+    
+    # A counter for making the sheep flash white and light gray
     if counter2 < 12:
         counter2 += 1
     else:
         counter2 = 0
+    
     # Draws the screen and its game objects
     screen.fill(BLACK)
     for tileCoordinate in safetySpaces:
@@ -217,7 +235,10 @@ while run:
     for ghost in ghosts:
         pygame.draw.rect(screen, RED, ghost.rect)
     pygame.draw.rect(screen, YELLOW, player.rect)
-    # Updates the display
+    
+    # Updates the display to show what's being drawn
     pygame.display.flip()
+    
+    # Caps the FPS at 60. I have found that 60 FPS works the best when it comes to responsiveness of movement.
     clock.tick(60)
 
