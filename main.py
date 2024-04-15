@@ -56,7 +56,7 @@ class Player(Entity):
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
 
     # Function for movement check and execution
-    def movement(self, xDirection: int, yDirection: int) -> list:
+    def movement(self, xDirection: int, yDirection: int):
         if [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in spaces or [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50] in safetySpaces:
             self.coordinates = [self.coordinates[0]+xDirection*50, self.coordinates[1]+yDirection*50]
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
@@ -122,23 +122,23 @@ class Sheep(Entity):
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)
     
     # A function that checks things like whether it's within a square of the player
-    def update(self, playerobject: object):
+    def update(self, playerObject: object):
         global run
         # If the player collides with a sheep that's not being carried while carrying a sheep, the game will stop
-        if playerobject.coordinates == self.coordinates and not self.carried:
+        if playerObject.coordinates == self.coordinates and not self.carried:
             run = False
         # Checks if the player is within a square, and then sets its carried variable to True and remembers where the player is
-        if playerobject.coordinates[0] >= self.coordinates[0]-50 and playerobject.coordinates[0] <= self.coordinates[0]+50 and playerobject.coordinates[1] >= self.coordinates[1]-50 and playerobject.coordinates[1] <= self.coordinates[1]+50 and (True not in [sheepbit.carried for sheepbit in sheep] or self.carried):
+        if playerObject.coordinates[0] >= self.coordinates[0]-50 and playerobject.coordinates[0] <= self.coordinates[0]+50 and playerobject.coordinates[1] >= self.coordinates[1]-50 and playerobject.coordinates[1] <= self.coordinates[1]+50 and (True not in [sheepbit.carried for sheepbit in sheep] or self.carried):
             self.carried = True
-            if playerobject.coordinates[0] > self.coordinates[0]:
+            if playerObject.coordinates[0] > self.coordinates[0]:
                 self.xDirection = 1
-            elif playerobject.coordinates[0] < self.coordinates[0]:
+            elif playerObject.coordinates[0] < self.coordinates[0]:
                 self.xDirection = -1
             else:
                 self.xDirection = 0
-            if playerobject.coordinates[1] > self.coordinates[1]:
+            if playerObject.coordinates[1] > self.coordinates[1]:
                 self.yDirection = 1
-            elif playerobject.coordinates[1] < self.coordinates[1]:
+            elif playerObject.coordinates[1] < self.coordinates[1]:
                 self.yDirection = -1
             else:
                 self.yDirection = 0
