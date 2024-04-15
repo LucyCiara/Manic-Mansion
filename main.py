@@ -2,6 +2,7 @@
 import pygame
 import random
 
+# Modification note: Instead of having the game board/display be its own class, I just handle everything before and during a game loop.
 # Constont values
 WIDTH, HEIGHT = 800, 600
 BLACK = (0, 0, 0)
@@ -39,6 +40,7 @@ safetySpaces = safetySpacesLeft+safetySpacesRight
 for space in safetySpaces:
     spaces.remove(space)
 
+# Modification note: I use a list for coordinates because i find it cleaner to work with. I also added a Pygame Rectangle variable because it's needed to display something in Pygame. I do placement in __init__(), as I didn't see a point to have it be its own function. I also didn't add a movement function because one of the classes inheriting this one doesn't move, and because movement works differently for the child classes that do move.
 # Super class
 class Entity:
     # Initiation where the coordinate variables are set
@@ -46,6 +48,7 @@ class Entity:
         self.coordinates = spaces[random.randint(0, len(spaces)-1)]
         self.rect = pygame.Rect(self.coordinates[0], self.coordinates[1], 50, 50)   
 
+# Modification note: I've made the points a global variable handled by the sheep class. I didn't see a point in having two separate bools for if a sheep was carried, so I only kept it on the sheep side. I handle placing the playerObject in a zone to the left in __init__() instead of in its own function. Collision is handled by the other sibling classes. The sheep becoming carried is handled by the sheep class.
 # The player class
 class Player(Entity):
     # Initiation where the super class is inherited, the player speed int is set, and the coordinates are changed to the safety space to the left
@@ -68,6 +71,7 @@ class Player(Entity):
             if sheepBit.carried:
                 self.speed = 0.5
 
+# Modification note: I gave the ghost class variables for its movement direction, and a speed for reusability. Placement is handled completely by the parent. The movement and change in direction is handled by the movement class. An update class handles collition with the player class.
 # The enemy class
 class Ghost(Entity):
     # Initiation where the speed is set and the movement direction is randomized to each possible diagonal movement and the super class is inherited
@@ -96,6 +100,7 @@ class Ghost(Entity):
         if self.coordinates == playerObject.coordinates:
             run = False
 
+# Modification note: I gave the sheep class a variable for it's original placement, such that I can add it to the available places for sheep to spawn to keep track of which of those spaces are available. The placement of the sheep is handed by the __init__() function just as with the player class. The handling of when the sheep is being carried is done by the movement function instead of its own function. This is because the movement and the being carried are too intertwined to be bothered to separate. The sheep is never properly removed, but is instead reused as the next sheep to spawn by executing the __init__() function. I added an update function for handling collision with the player object. Both in the sense of the player walking into the sheep object while carrying another (causing a game over) and in the sense of being within a tile of the player, causing its status as carried to activate, and causing it to execute its movement.
 # The class of the resource meant to be collected
 class Sheep(Entity):
     # Initiates the object by inheriting from the entity superclass, changing its position to a random position on the right safetyspaces, and setting a variable for whether it's being carried or not
@@ -128,7 +133,7 @@ class Sheep(Entity):
         if playerObject.coordinates == self.coordinates and not self.carried:
             run = False
         # Checks if the player is within a square, and then sets its carried variable to True and remembers where the player is
-        if playerObject.coordinates[0] >= self.coordinates[0]-50 and playerobject.coordinates[0] <= self.coordinates[0]+50 and playerobject.coordinates[1] >= self.coordinates[1]-50 and playerobject.coordinates[1] <= self.coordinates[1]+50 and (True not in [sheepbit.carried for sheepbit in sheep] or self.carried):
+        if playerObject.coordinates[0] >= self.coordinates[0]-50 and playerObject.coordinates[0] <= self.coordinates[0]+50 and playerObject.coordinates[1] >= self.coordinates[1]-50 and playerObject.coordinates[1] <= self.coordinates[1]+50 and (True not in [sheepbit.carried for sheepbit in sheep] or self.carried):
             self.carried = True
             if playerObject.coordinates[0] > self.coordinates[0]:
                 self.xDirection = 1
@@ -145,7 +150,8 @@ class Sheep(Entity):
         # If the if statement returns False, it checks whether it's being carried or not, and moves towards the player if it is
         elif self.carried:
             self.movement()
-            
+
+# Modification note: Placement is handled completely by the parent class.
 # The obstacle class
 class Wall(Entity):
     # Initiates by inheriting the super class and removing its position from the available spaces for the player
